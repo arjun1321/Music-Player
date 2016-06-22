@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
 
     private MusicController musicController;
 
+    private boolean paused = false, playBackPaused = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +63,11 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 musicService.setSong(position);
                 musicService.playSong();
+                if(playBackPaused){
+                    setCotroller();
+                    playBackPaused = false;
+                }
+                musicController.show();
             }
         });
 
@@ -141,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()){
 
             case R.id.action_shuffle:
+                musicService.setShuffle();
                 break;
             case R.id.action_end:
                 stopService(intent);
@@ -183,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void pause() {
+                playBackPaused = true;
                 musicService.pausePlayer();
 
             }
@@ -250,11 +259,40 @@ public class MainActivity extends AppCompatActivity {
 
     private void playNext(){
         musicService.playNext();
+        if(playBackPaused){
+            setCotroller();
+            playBackPaused = false;
+        }
         musicController.show();
     }
 
     private void playPrev(){
         musicService.playPrev();
+        if(playBackPaused){
+            setCotroller();
+            playBackPaused = false;
+        }
         musicController.show();
+    }
+
+    @Override
+    protected void onPause() {
+        paused = true;
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        if(paused){
+            setCotroller();
+            paused = false;
+        }
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        musicController.hide();
+        super.onStop();
     }
 }

@@ -3,8 +3,10 @@ package com.arjunkumar.musicplayer;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -16,6 +18,7 @@ import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by Arjun Kumar on 21-06-2016.
@@ -27,6 +30,8 @@ public class MusicService extends Service {
     private int songPostion;
     private String songTitle = "";
     private static final int NOTIFY_ID = 1;
+    private boolean shuffle = false;
+    private Random random;
 
     private final IBinder musicBind = new MusicBinder();
 
@@ -52,6 +57,7 @@ public class MusicService extends Service {
         //initializing position
         songPostion = 0;
 
+        random = new Random();
         //creating media player
         mediaPlayer = new MediaPlayer();
 
@@ -95,12 +101,17 @@ public class MusicService extends Service {
             @Override
             public void onCompletion(MediaPlayer mp) {
 
+                if(mediaPlayer.getCurrentPosition() > 0){
+                    mp.reset();
+                    playNext();
+                }
             }
         });
 
         mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
+                mp.reset();
                 return false;
             }
         });
@@ -176,9 +187,19 @@ public class MusicService extends Service {
 
     //skip to next song
     public void playNext(){
-        songPostion++;
-        if(songPostion >= songArrayList.size()){
-            songPostion = 0;
+
+        if(shuffle){
+            int newSong = songPostion;
+            while (newSong == songPostion){
+                newSong = random.nextInt(songArrayList.size());
+            }
+            songPostion = newSong;
+        }
+        else {
+            songPostion++;
+            if(songPostion >= songArrayList.size()){
+                songPostion = 0;
+            }
         }
         playSong();
     }
@@ -188,4 +209,11 @@ public class MusicService extends Service {
     public void onDestroy() {
         stopForeground(true);
     }
+
+    public void setShuffle(){
+        if(shuffle)
+            shuffle = false;
+        else shuffle = true;
+    }
+
 }
