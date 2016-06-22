@@ -15,6 +15,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.MediaStore.Audio.Media;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -178,9 +179,18 @@ public class MusicService extends Service {
 
     //skip to  previous song
     public void playPrev(){
-        songPostion--;
-        if(songPostion < 0){
-            songPostion = songArrayList.size() -1;
+        if(shuffle){
+            int newSong = songPostion;
+            while (newSong == songPostion){
+                newSong = random.nextInt(songArrayList.size());
+            }
+            songPostion = newSong;
+        }
+        else {
+            songPostion--;
+            if(songPostion < 0){
+                songPostion = songArrayList.size() -1;
+            }
         }
         playSong();
     }
@@ -211,9 +221,15 @@ public class MusicService extends Service {
     }
 
     public void setShuffle(){
-        if(shuffle)
+        if(shuffle){
             shuffle = false;
-        else shuffle = true;
+            Toast.makeText(getApplicationContext(), "Shuffle Off", Toast.LENGTH_LONG).show();
+        }
+
+        else{
+            shuffle = true;
+            Toast.makeText(getApplicationContext(), "Shuffle On", Toast.LENGTH_LONG).show();
+        }
     }
 
 }
