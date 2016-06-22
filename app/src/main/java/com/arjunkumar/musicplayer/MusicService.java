@@ -1,5 +1,7 @@
 package com.arjunkumar.musicplayer;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -23,6 +25,8 @@ public class MusicService extends Service {
     private MediaPlayer mediaPlayer;
     private ArrayList<Song> songArrayList;
     private int songPostion;
+    private String songTitle = "";
+    private static final int NOTIFY_ID = 1;
 
     private final IBinder musicBind = new MusicBinder();
 
@@ -66,6 +70,23 @@ public class MusicService extends Service {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 mp.start();
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                Notification.Builder builder = new Notification.Builder(getApplicationContext());
+
+                builder.setContentIntent(pendingIntent)
+                       .setSmallIcon(R.drawable.android_music_player_play)
+                       .setTicker(songTitle)
+                        .setOngoing(true)
+                        .setContentTitle("Playing")
+                        .setContentText(songTitle);
+
+                Notification notification = builder.build();
+
+                startForeground(NOTIFY_ID, notification);
 
             }
         });
@@ -101,6 +122,8 @@ public class MusicService extends Service {
 
         Song playSong = songArrayList.get(songPostion);
         long currentSong = playSong.getId();
+
+        songTitle = playSong.getTitle();
 
         Uri trackUri = ContentUris.withAppendedId(Media.EXTERNAL_CONTENT_URI, currentSong);
 
@@ -160,4 +183,9 @@ public class MusicService extends Service {
         playSong();
     }
 
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
+    }
 }
