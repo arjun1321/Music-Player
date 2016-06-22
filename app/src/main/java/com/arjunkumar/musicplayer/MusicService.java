@@ -114,8 +114,50 @@ public class MusicService extends Service {
     }
 
     public void setSong(int songIndex){
+
         songPostion = songIndex;
     }
 
+    public int getPosition(){
+        return mediaPlayer.getCurrentPosition();
+    }
+
+    public int getDuration(){
+        return mediaPlayer.getDuration();
+    }
+
+    public boolean isPlaying(){
+        return mediaPlayer.isPlaying();
+    }
+
+    public void pausePlayer(){
+        mediaPlayer.pause();
+    }
+
+    public void seekTo(int pos){
+        mediaPlayer.seekTo(pos);
+    }
+
+    public void go(){
+        mediaPlayer.start();
+    }
+
+    //skip to  previous song
+    public void playPrev(){
+        songPostion--;
+        if(songPostion < 0){
+            songPostion = songArrayList.size() -1;
+        }
+        playSong();
+    }
+
+    //skip to next song
+    public void playNext(){
+        songPostion++;
+        if(songPostion >= songArrayList.size()){
+            songPostion = 0;
+        }
+        playSong();
+    }
 
 }
